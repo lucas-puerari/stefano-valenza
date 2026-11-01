@@ -30,18 +30,30 @@ const publishedArticles = articles.filter((article) => !article.data.draft);
 const featuredArticle = publishedArticles.length > 1 ? publishedArticles[0] : undefined;
 const homepageArticles = articles.filter((article) => article.id !== featuredArticle?.id).slice(0, 3);
 const base = import.meta.env.BASE_URL;
+// Bubbles popping into the hero's foam: fixed values so the build is deterministic.
+// x = left (%), s = size (px), t = duration (s), d = delay (s).
+const foamPops = [
+  { x: 4, s: 6, t: 3.8, d: 0.2 }, { x: 11, s: 5, t: 4.6, d: 2.1 }, { x: 19, s: 7, t: 3.4, d: 1.3 },
+  { x: 27, s: 5, t: 5.2, d: 3.4 }, { x: 34, s: 6, t: 4.1, d: 0.7 }, { x: 42, s: 5, t: 3.6, d: 2.8 },
+  { x: 49, s: 7, t: 4.9, d: 1.6 }, { x: 57, s: 5, t: 3.9, d: 4.0 }, { x: 63, s: 6, t: 4.4, d: 0.4 },
+  { x: 71, s: 5, t: 3.5, d: 2.4 }, { x: 78, s: 7, t: 5.0, d: 3.1 }, { x: 85, s: 5, t: 4.2, d: 1.0 },
+  { x: 91, s: 6, t: 3.7, d: 2.6 }, { x: 97, s: 5, t: 4.8, d: 0.9 },
+];
 ---
 <BaseLayout>
-  <section class="bg-primary text-primary-content" aria-labelledby="home-title">
+  <section class="beer-hero text-primary" aria-labelledby="home-title">
+    <div class="beer-pops" aria-hidden="true">
+      {foamPops.map((pop) => <span style={`--x:${pop.x}%;--s:${pop.s}px;--t:${pop.t}s;--d:${pop.d}s`} />)}
+    </div>
     <div class:list={['mx-auto grid max-w-6xl gap-[clamp(1.5rem,4vw,3.5rem)] px-5 py-[clamp(2rem,4vw,4rem)] sm:px-6', featuredArticle && 'lg:grid-cols-[3fr_2fr] lg:items-end']}>
       <div>
-        <p class="text-xs font-semibold tracking-[.12em] text-secondary">{home.data.eyebrow}</p>
-        <h1 id="home-title" class:list={['mt-5 max-w-3xl font-display leading-[1.12] font-semibold tracking-tight', featuredArticle ? 'text-[clamp(2rem,4vw,3.5rem)]' : 'text-[clamp(2rem,6.5vw,4.5rem)]']}>
+        <p class="text-xs font-semibold tracking-[.12em] text-primary">{home.data.eyebrow}</p>
+        <h1 id="home-title" class:list={['mt-5 max-w-3xl font-display leading-[1.12] font-bold tracking-tight', featuredArticle ? 'text-[clamp(2rem,4vw,3.5rem)]' : 'text-[clamp(2rem,6.5vw,4.5rem)]']}>
           <span class="block">{home.data.titleFirstLine}</span>
           <span class="block">{home.data.titleSecondLine}</span>
-          <em class="block text-secondary">{home.data.titleEmphasis}</em>
+          <em class="block">{home.data.titleEmphasis}</em>
         </h1>
-        <div class="mt-5 max-w-xl text-[clamp(1rem,1.2vw,1.125rem)] leading-relaxed text-primary-content/90 [&_p]:text-primary-content/90"><HomeContent /></div>
+        <div class="mt-5 max-w-xl text-[clamp(1rem,1.2vw,1.125rem)] leading-relaxed text-primary [&_p]:text-primary"><HomeContent /></div>
       </div>
       {featuredArticle && (
         <aside class="card border border-secondary/40 bg-base-100 text-base-content" aria-label={home.data.featuredLabel}>
@@ -55,7 +67,7 @@ const base = import.meta.env.BASE_URL;
               {featuredArticle.data.draft && <span class="badge badge-soft badge-error badge-sm">{site.data.draftLabel}</span>}
               <time datetime={featuredArticle.data.date.toISOString()}>{formatDate(featuredArticle.data.date)}</time>
             </div>
-            <h2 class="card-title mt-2 font-display text-2xl leading-snug font-semibold">{featuredArticle.data.title}</h2>
+            <h2 class="card-title mt-2 font-display text-2xl leading-snug font-bold">{featuredArticle.data.title}</h2>
             <p class="leading-relaxed text-base-content/75">{featuredArticle.data.description}</p>
             <div class="card-actions mt-3">
               <a class="btn btn-outline btn-primary" href={assetPath(`/articles/${featuredArticle.id}/`, base)}>{site.data.readArticleLabel} <span aria-hidden="true">→</span></a>
@@ -66,12 +78,12 @@ const base = import.meta.env.BASE_URL;
     </div>
   </section>
 
-  <section id="about" class="scroll-mt-24 bg-base-200" aria-labelledby="about-title">
+  <section id="about" class="scroll-mt-24 bg-warning text-warning-content" aria-labelledby="about-title">
     <div class:list={['mx-auto grid max-w-6xl gap-[clamp(1.5rem,4vw,3.5rem)] px-5 pt-[clamp(2rem,4vw,4rem)] sm:px-6', about.data.portrait ? 'lg:grid-cols-[3fr_2fr] lg:items-end' : 'pb-[clamp(2rem,4vw,4rem)]']}>
       <div class:list={[about.data.portrait ? 'lg:pb-[clamp(2rem,4vw,4rem)]' : 'max-w-3xl']}>
-        <p class="text-xs font-semibold tracking-[.12em] text-warning">{about.data.eyebrow}</p>
-        <h2 id="about-title" class="mt-4 font-display text-[clamp(2rem,4vw,3.25rem)] leading-tight font-semibold tracking-tight">{about.data.title}<span class="text-accent">.</span></h2>
-        <div class="prose mt-5 max-w-2xl sm:prose-lg"><AboutContent /></div>
+        <p class="text-xs font-semibold tracking-[.12em] text-warning-content/85">{about.data.eyebrow}</p>
+        <h2 id="about-title" class="mt-4 font-display text-[clamp(2rem,4vw,3.25rem)] leading-tight font-bold tracking-tight">{about.data.title}<span class="text-secondary">.</span></h2>
+        <div class="prose mt-5 max-w-2xl sm:prose-lg prose-p:text-warning-content/90 prose-strong:text-warning-content prose-a:text-secondary"><AboutContent /></div>
       </div>
       {about.data.portrait && (
         /* Elbows rest on the section's bottom edge and the hands hang over it.
@@ -90,7 +102,7 @@ const base = import.meta.env.BASE_URL;
     <div class="mb-7 flex flex-wrap items-end justify-between gap-4 sm:mb-9">
       <div>
         <p class="text-xs font-semibold tracking-[.12em] text-warning">{home.data.articlesEyebrow}</p>
-        <h2 id="articles-title" class="mt-4 font-display text-[clamp(2rem,4vw,3.25rem)] leading-tight font-semibold tracking-tight">{home.data.articlesTitle}<span class="text-accent">.</span></h2>
+        <h2 id="articles-title" class="mt-4 font-display text-[clamp(2rem,4vw,3.25rem)] leading-tight font-bold tracking-tight">{home.data.articlesTitle}<span class="text-accent">.</span></h2>
         <p class="mt-4 max-w-2xl leading-relaxed text-base-content/75">{home.data.articlesIntro}</p>
       </div>
       <span class="pb-2 text-xs tracking-wider text-base-content/60">{String(articles.length).padStart(2, '0')} {articles.length === 1 ? home.data.articleCountSingularLabel : home.data.articleCountLabel}</span>
@@ -109,7 +121,7 @@ const base = import.meta.env.BASE_URL;
                   {article.data.draft && <span class="badge badge-soft badge-error badge-sm">{site.data.draftLabel}</span>}
                   <time datetime={article.data.date.toISOString()}>{formatDate(article.data.date)}</time>
                 </div>
-                <h3 class="card-title mt-3 font-display text-xl leading-snug font-semibold"><a class="after:absolute after:inset-0 after:rounded-box hover:text-accent" href={assetPath(`/articles/${article.id}/`, base)}>{article.data.title}</a></h3>
+                <h3 class="card-title mt-3 font-display text-xl leading-snug font-bold"><a class="after:absolute after:inset-0 after:rounded-box hover:text-accent" href={assetPath(`/articles/${article.id}/`, base)}>{article.data.title}</a></h3>
                 <p class="mt-2 text-sm leading-relaxed text-base-content/75">{article.data.description}</p>
                 <div class="card-actions mt-auto pt-4">
                   <span class="text-sm font-semibold text-primary" aria-hidden="true">{site.data.readArticleLabel} →</span>
@@ -125,14 +137,14 @@ const base = import.meta.env.BASE_URL;
     )}
   </section>
 
-  <section id="collaborations" class="scroll-mt-24 bg-base-200" aria-labelledby="collaborations-title">
+  <section id="collaborations" class="scroll-mt-24 bg-info bg-hops text-info-content" aria-labelledby="collaborations-title">
     <div class="mx-auto grid max-w-6xl gap-[clamp(1.5rem,4vw,3.5rem)] px-5 py-[clamp(2rem,4vw,4rem)] sm:px-6 lg:grid-cols-[2fr_3fr]">
       <div>
-        <p class="text-xs font-semibold tracking-[.12em] text-warning">{collaborations.data.eyebrow}</p>
-        <h2 id="collaborations-title" class="mt-4 font-display text-[clamp(2rem,4vw,3.25rem)] leading-tight font-semibold tracking-tight">{collaborations.data.title}{needsAccentDot(collaborations.data.title) && <span class="text-accent">.</span>}</h2>
+        <p class="text-xs font-semibold tracking-[.12em] text-primary">{collaborations.data.eyebrow}</p>
+        <h2 id="collaborations-title" class="mt-4 font-display text-[clamp(2rem,4vw,3.25rem)] leading-tight font-bold tracking-tight">{collaborations.data.title}{needsAccentDot(collaborations.data.title) && <span class="text-primary">.</span>}</h2>
       </div>
       <div>
-        <div class="prose max-w-none sm:prose-lg"><CollaborationsContent /></div>
+        <div class="prose max-w-none sm:prose-lg prose-p:text-info-content prose-strong:text-info-content prose-a:text-primary"><CollaborationsContent /></div>
         {collaborations.data.contactEmail && collaborations.data.contactLabel && (
           <a class="btn btn-primary mt-4" href={`mailto:${collaborations.data.contactEmail}`}>{collaborations.data.contactLabel} <span aria-hidden="true">→</span></a>
         )}
