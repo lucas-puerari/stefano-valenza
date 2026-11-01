@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Germania+One&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@600;700&family=Space+Mono:wght@400;700&display=swap');
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
 @plugin 'daisyui' {
@@ -8,24 +8,27 @@
   name: 'stefano';
   default: true;
   color-scheme: light;
-  --color-base-100: #faf8f2;
-  --color-base-200: #eee9df;
-  --color-base-300: #d8d0c2;
-  --color-base-content: #2c1b1e;
-  --color-primary: #3c0f1e;
-  --color-primary-content: #faf8f2;
-  --color-secondary: #d9b677;
-  --color-secondary-content: #2c1b1e;
-  --color-accent: #80572b;
-  --color-accent-content: #ffffff;
-  --color-neutral: #270c17;
-  --color-neutral-content: #faf8f2;
-  --color-info: #4d5e62;
-  --color-info-content: #ffffff;
+  /* "Bordeaux & Petrolio": flat colour blocks in the spirit of citramilano.it. Wine bordeaux, amber beer,
+     petrol teal (accents, links, "Chi sono" block) and a soft blush (info, used for the collaborations block).
+     Text pairs checked for WCAG AA: bordeaux/ink/petrol on cream; cream on bordeaux and petrol; ink on blush. */
+  --color-base-100: #f7f0e8;
+  --color-base-200: #efe3d6;
+  --color-base-300: #e2d2c0;
+  --color-base-content: #1f1013;
+  --color-primary: #6a1b30;
+  --color-primary-content: #f7f0e8;
+  --color-secondary: #f1b46c;
+  --color-secondary-content: #1f1013;
+  --color-accent: #1f5f5b;
+  --color-accent-content: #f7f0e8;
+  --color-neutral: #45101f;
+  --color-neutral-content: #f7f0e8;
+  --color-info: #f3cdbd;
+  --color-info-content: #1f1013;
   --color-success: #49634b;
   --color-success-content: #ffffff;
-  --color-warning: #795024;
-  --color-warning-content: #ffffff;
+  --color-warning: #1f5f5b;
+  --color-warning-content: #f7f0e8;
   --color-error: #842b35;
   --color-error-content: #ffffff;
   --radius-box: 0.5rem;
@@ -41,13 +44,155 @@
 
 @theme {
   --font-sans: 'DM Sans', system-ui, sans-serif;
-  --font-display: 'Germania One', Georgia, serif;
+  --font-display: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
   --font-mono: 'Space Mono', monospace;
 }
 
-/* Vintage German beer-hall headings. Germania One ships a single upright weight, so stop the
-   browser from faking bold (font-semibold) or slanting it (italic). */
+/* Plain bold headings matching citramilano.it: the system font (San Francisco on Apple, Segoe UI on Windows), Inter elsewhere. Only upright weights are loaded, so stop the
+   browser from faking an italic. */
 @utility font-display {
   font-family: var(--font-display);
   font-synthesis: none;
+}
+
+/* Home hero as a stylised, flat glass of amber beer with bordeaux copy. Layers, back to front: amber gradient, two flat foam waves swaying independently (::after),
+   rising bubbles (::before), bubbles popping into the foam (.beer-pops), content.
+   Tiles in src/assets come from scripts/generate-beer-art.py. Motion stops for reduced-motion users.
+   Contrast on the whole gradient: bordeaux copy >= 5.1:1, petrol title emphasis >= 3.3:1 (large text). */
+@utility beer-hero {
+  position: relative;
+  isolation: isolate;
+  padding-top: 5rem;
+  background: linear-gradient(#f1b46c 0, #f1b46c 45%, #e59d55 100%);
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: url('../assets/beer-bubbles.svg') 0 0 / 720px 720px, url('../assets/beer-bubbles.svg') 140px 90px / 432px 432px;
+    /* Start below the foam so no bubble sits on top of it. */
+    mask-image: linear-gradient(to bottom, transparent 88px, black 168px);
+    animation: beer-bubbles-rise 22s linear infinite;
+  }
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 120px;
+    z-index: -2;
+    pointer-events: none;
+    /* Front wave first (on top). Each layer sways on its own loop; the durations differ so they drift in and out of phase. */
+    background:
+      url('../assets/beer-foam-front.svg') var(--foam-front-x) 0 / 1200px 120px repeat-x,
+      url('../assets/beer-foam-back.svg') var(--foam-back-x) 0 / 1200px 120px repeat-x;
+    animation:
+      beer-foam-front-sway 9s ease-in-out infinite alternate,
+      beer-foam-back-sway 13s ease-in-out -4s infinite alternate;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    &::before,
+    &::after {
+      animation: none;
+    }
+  }
+}
+
+/* Registered so the background offsets interpolate smoothly inside keyframes. */
+@property --foam-front-x {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --foam-back-x {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+/* Opposite directions read as a gentle slosh. Tiles repeat-x, so no edge ever shows. */
+@keyframes beer-foam-front-sway {
+  from {
+    --foam-front-x: -50px;
+  }
+  to {
+    --foam-front-x: 50px;
+  }
+}
+
+@keyframes beer-foam-back-sway {
+  from {
+    --foam-back-x: 70px;
+  }
+  to {
+    --foam-back-x: -70px;
+  }
+}
+
+@keyframes beer-bubbles-rise {
+  from {
+    background-position: 0 0, 140px 90px;
+  }
+  to {
+    background-position: 0 -720px, 140px -342px;
+  }
+}
+
+/* Bubbles reaching the foam: a flat dot rises, then pops into a ring that widens and fades.
+   Each span gets its position, size, duration and delay from inline custom properties. */
+@utility beer-pops {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 130px;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  & > span {
+    position: absolute;
+    top: 100px;
+    left: var(--x);
+    width: var(--s);
+    height: var(--s);
+    border: 1.5px solid #fbf4ea;
+    border-radius: 50%;
+    background-color: #fbf4ea;
+    opacity: 0;
+    animation: beer-pop var(--t) ease-in var(--d) infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    display: none;
+  }
+}
+
+@keyframes beer-pop {
+  0% {
+    transform: translateY(0) scale(0.6);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.8;
+  }
+  75% {
+    transform: translateY(-34px) scale(1);
+    background-color: #fbf4ea;
+    opacity: 0.8;
+  }
+  80% {
+    transform: translateY(-36px) scale(1.2);
+    background-color: transparent;
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-36px) scale(2.6);
+    background-color: transparent;
+    opacity: 0;
+  }
+}
+
+/* Collaborations section: faint hop cones (src/assets/hop-pattern.svg, seamless 224px tile; colour and
+   opacity live in the SVG). Only sets the image, so the section keeps its own background colour. */
+@utility bg-hops {
+  background-image: url('../assets/hop-pattern.svg');
+  background-size: 224px 224px;
 }
