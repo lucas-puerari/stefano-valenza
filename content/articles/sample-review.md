@@ -2,7 +2,7 @@
 title: "La mia prossima recensione"
 description: "Un esempio di bozza: modifica o elimina questo file prima di pubblicare."
 date: 2026-03-02
-type: recensione
+type: review
 brewery: "Nome del birrificio"
 style: "Stile della birra"
 draft: true

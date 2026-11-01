@@ -2,7 +2,7 @@
 title: "Degustare una birra: da dove iniziare"
 description: "Una guida semplice per osservare, annusare e assaggiare con più curiosità."
 date: 2026-03-01
-type: guida
+type: guide
 ---
 
 Degustare non significa trovare per forza parole complicate. Significa rallentare un momento e fare attenzione a quello che hai davanti.

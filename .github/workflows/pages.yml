@@ -1,11 +1,13 @@
 name: Build and deploy
 
+# The `build` job is a required status check on main: do not rename it.
+# Deploy runs only on push to main (i.e. after a squash-merge) and only if build passes.
+
 on:
   pull_request:
     branches: [main]
   push:
     branches: [main]
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -22,16 +24,22 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npm run check
-      - run: npm run build
+      - name: Lint
+        run: make lint
+      - name: Test
+        run: make test
+      - name: Type check
+        run: make check
+      - name: Build
+        run: make build
       - name: Upload Pages artifact
-        if: github.event_name != 'pull_request'
+        if: github.event_name == 'push'
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
 
   deploy:
-    if: github.event_name != 'pull_request'
+    if: github.event_name == 'push'
     needs: build
     runs-on: ubuntu-latest
     permissions:
