@@ -33,7 +33,7 @@ const base = import.meta.env.BASE_URL;
 ---
 <BaseLayout>
   <section class="bg-primary text-primary-content" aria-labelledby="home-title">
-    <div class:list={['mx-auto grid max-w-6xl gap-[clamp(1.5rem,4vw,3.5rem)] px-5 py-[clamp(2.75rem,6vw,6rem)] sm:px-6', featuredArticle && 'lg:grid-cols-[3fr_2fr] lg:items-end']}>
+    <div class:list={['mx-auto grid max-w-6xl gap-[clamp(1.5rem,4vw,3.5rem)] px-5 py-[clamp(2rem,4vw,4rem)] sm:px-6', featuredArticle && 'lg:grid-cols-[3fr_2fr] lg:items-end']}>
       <div>
         <p class="text-xs font-semibold tracking-[.12em] text-secondary">{home.data.eyebrow}</p>
         <h1 id="home-title" class:list={['mt-5 max-w-3xl font-display leading-[1.12] font-semibold tracking-tight', featuredArticle ? 'text-[clamp(2rem,4vw,3.5rem)]' : 'text-[clamp(2rem,6.5vw,4.5rem)]']}>
@@ -67,8 +67,8 @@ const base = import.meta.env.BASE_URL;
   </section>
 
   <section id="about" class="scroll-mt-24 bg-base-200" aria-labelledby="about-title">
-    <div class:list={['mx-auto grid max-w-6xl gap-[clamp(1.5rem,4vw,3.5rem)] px-5 pt-[clamp(2.75rem,6vw,6rem)] sm:px-6', about.data.portrait ? 'lg:grid-cols-[3fr_2fr] lg:items-end' : 'pb-[clamp(2.75rem,6vw,6rem)]']}>
-      <div class:list={[about.data.portrait ? 'lg:pb-[clamp(2.75rem,6vw,6rem)]' : 'max-w-3xl']}>
+    <div class:list={['mx-auto grid max-w-6xl gap-[clamp(1.5rem,4vw,3.5rem)] px-5 pt-[clamp(2rem,4vw,4rem)] sm:px-6', about.data.portrait ? 'lg:grid-cols-[3fr_2fr] lg:items-end' : 'pb-[clamp(2rem,4vw,4rem)]']}>
+      <div class:list={[about.data.portrait ? 'lg:pb-[clamp(2rem,4vw,4rem)]' : 'max-w-3xl']}>
         <p class="text-xs font-semibold tracking-[.12em] text-warning">{about.data.eyebrow}</p>
         <h2 id="about-title" class="mt-4 font-display text-[clamp(2rem,4vw,3.25rem)] leading-tight font-semibold tracking-tight">{about.data.title}<span class="text-accent">.</span></h2>
         <div class="prose mt-5 max-w-2xl sm:prose-lg"><AboutContent /></div>
@@ -86,7 +86,7 @@ const base = import.meta.env.BASE_URL;
     </div>
   </section>
 
-  <section id="articles" class:list={['mx-auto max-w-6xl scroll-mt-24 px-5 py-[clamp(2.75rem,6vw,6rem)] sm:px-6', about.data.portrait && 'max-lg:pt-[calc(clamp(2.75rem,6vw,6rem)+6rem)]']} aria-labelledby="articles-title">
+  <section id="articles" class:list={['mx-auto max-w-6xl scroll-mt-24 px-5 py-[clamp(2rem,4vw,4rem)] sm:px-6', about.data.portrait && 'max-lg:pt-[calc(clamp(2rem,4vw,4rem)+6rem)]']} aria-labelledby="articles-title">
     <div class="mb-7 flex flex-wrap items-end justify-between gap-4 sm:mb-9">
       <div>
         <p class="text-xs font-semibold tracking-[.12em] text-warning">{home.data.articlesEyebrow}</p>
@@ -126,7 +126,7 @@ const base = import.meta.env.BASE_URL;
   </section>
 
   <section id="collaborations" class="scroll-mt-24 bg-base-200" aria-labelledby="collaborations-title">
-    <div class="mx-auto grid max-w-6xl gap-[clamp(1.5rem,4vw,3.5rem)] px-5 py-[clamp(2.75rem,6vw,6rem)] sm:px-6 lg:grid-cols-[2fr_3fr]">
+    <div class="mx-auto grid max-w-6xl gap-[clamp(1.5rem,4vw,3.5rem)] px-5 py-[clamp(2rem,4vw,4rem)] sm:px-6 lg:grid-cols-[2fr_3fr]">
       <div>
         <p class="text-xs font-semibold tracking-[.12em] text-warning">{collaborations.data.eyebrow}</p>
         <h2 id="collaborations-title" class="mt-4 font-display text-[clamp(2rem,4vw,3.25rem)] leading-tight font-semibold tracking-tight">{collaborations.data.title}{needsAccentDot(collaborations.data.title) && <span class="text-accent">.</span>}</h2>

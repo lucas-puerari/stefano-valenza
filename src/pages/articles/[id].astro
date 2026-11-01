@@ -21,7 +21,7 @@ const typeLabels = {
 const base = import.meta.env.BASE_URL;
 ---
 <BaseLayout title={article.data.title} description={article.data.description} type="article" published={article.data.date} image={article.data.cover} imageAlt={article.data.coverAlt}>
-  <article class="mx-auto max-w-6xl px-5 py-[clamp(2.75rem,6vw,6rem)] sm:px-6">
+  <article class="mx-auto max-w-6xl px-5 py-[clamp(2rem,4vw,4rem)] sm:px-6">
     <nav class="breadcrumbs text-sm" aria-label="Percorso di navigazione">
       <ul><li><a href={assetPath('/', base)}>{site.data.homePageTitle}</a></li><li><a href={assetPath('/articles/', base)}>{site.data.allArticlesLabel}</a></li><li aria-current="page">{article.data.title}</li></ul>
     </nav>
