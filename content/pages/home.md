@@ -8,6 +8,7 @@ articlesEyebrow: "PER INIZIARE"
 articlesTitle: "Ultimi articoli"
 articlesIntro: "Guide per orientarsi, degustazioni e storie da scoprire un bicchiere alla volta."
 articleCountLabel: "ARTICOLI"
+articleCountSingularLabel: "ARTICOLO"
 emptyArticles: "Gli articoli stanno arrivando. Torna presto a trovarmi!"
 ---
 
