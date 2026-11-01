@@ -11,15 +11,30 @@ The site uses **Tailwind CSS v4** for layout utilities, **daisyUI v5** for ready
 Requires Node.js 24 and npm. Clone the repository, then run:
 
 ```sh
-npm ci
-npm run dev
+make install   # npm ci + installs the git hooks in .githooks/
+make dev
 ```
+
+`make install` (any `npm ci`/`npm install`) sets `core.hooksPath` to `.githooks/`, which enables:
+
+- `pre-commit`: blocks commits on `main` and runs `make lint test`.
+- `commit-msg`: rejects commit subjects that are not Conventional Commits.
+- `pre-push`: rejects pushes to `main`.
+
+Hooks give fast feedback only; CI and branch protection are the real enforcement (hooks can be bypassed with `--no-verify`).
+
+| Command      | What it does                                   |
+| ------------ | ---------------------------------------------- |
+| `make lint`  | ESLint (TypeScript, Astro, scripts)            |
+| `make test`  | Unit tests (`node --test`)                     |
+| `make check` | Astro type checks                              |
+| `make build` | Production build into `dist/`                  |
+| `make ci`    | Everything CI runs: lint, test, check, build   |
 
 Open the URL shown in the terminal (usually `http://localhost:4321/`). Changes to Markdown files and site code appear automatically in the browser. Check the production build with:
 
 ```sh
-npm run check
-npm run build
+make ci
 npm run preview
 ```
 
@@ -75,15 +90,15 @@ You can also edit Markdown files directly on GitHub, create a branch, and open a
 
 1. Create a branch named `type/short-slug`, for example `git switch -c content/new-review`. Allowed types: `feat`, `fix`, `docs`, `content`, `refactor`, `style`, `test`, `chore`, `ci`, `perf`, and `build`. Use lowercase letters, numbers, and hyphens in the slug.
 2. Write and preview with `npm run dev`; keep `draft: true` until the article is ready.
-3. Set `draft: false`, run `npm run check && npm run build`, then commit with a [Conventional Commit](https://www.conventionalcommits.org/), for example `git add content/articles && git commit -m "content: add new review" && git push -u origin content/new-review`. Every commit in a PR, including subsequent fixes, must use `type: short description` or `type(scope): short description`.
-4. Open a pull request targeting `main` and fill in `.github/PULL_REQUEST_TEMPLATE.md`: summary, checked change type, verification, and publishing notes. The **PR title must also be a Conventional Commit** (for example `content: add new review`). CI checks the branch, every commit, PR title, template, tests, types, and production build; PRs **never deploy**.
-5. After review and a passing required **build** check, squash-merge into `main`. Only this merge triggers the build and deploy to GitHub Pages. Direct pushes to `main` are blocked by GitHub branch protection.
+3. Set `draft: false`, run `make ci`, then commit with a [Conventional Commit](https://www.conventionalcommits.org/), for example `git add content/articles && git commit -m "content: add new review" && git push -u origin content/new-review`. Every commit in a PR, including subsequent fixes, must use `type: short description` or `type(scope): short description`.
+4. Open a pull request targeting `main` and fill in `.github/PULL_REQUEST_TEMPLATE.md`: summary, checked change type, verification, and publishing notes. The **PR title must also be a Conventional Commit** (for example `content: add new review`). Two required checks run: **conventions** (branch name, every commit, PR title, template; re-runs when you edit the title or description) and **build** (lint, tests, types, production build). PRs **never deploy**.
+5. After review and passing **build** and **conventions** checks, squash-merge into `main` (the PR title becomes the commit message on `main`). Only this merge triggers the build and, if lint, tests, and build pass, the deploy to GitHub Pages. Direct pushes to `main` are blocked by GitHub branch protection.
 
 ## Configure GitHub Pages (once)
 
 1. Push the initial repository (including `package-lock.json`) to GitHub. This one-time bootstrap must happen before protection can be enabled on the empty repository.
 2. Select **GitHub Actions** as the source in **Settings → Pages → Build and deployment**. Make sure Actions are enabled under **Settings → Actions → General**.
-3. Protect `main` in **Settings → Branches**: require a PR and the passing **build** check, apply the protection to administrators, require linear history, and allow squash merges only. This repository is configured with those settings; verify them before editing repository governance.
+3. Protect `main` in **Settings → Branches**: require a PR and the passing **build** and **conventions** checks, apply the protection to administrators, require linear history, and allow squash merges only. This repository is configured with those settings; verify them before editing repository governance.
 4. After a PR merges, the `push` workflow deploys the site. The default URL is `https://USER.github.io/REPO/`, or `https://USER.github.io/` for a `USER.github.io` repository.
 
 For a custom domain, configure it in **Settings → Pages** and set the `SITE_URL` variable in **Settings → Secrets and variables → Actions → Variables** to the full URL, e.g. `https://beer.example/`. `SITE_URL` can also override the automatically detected GitHub Pages URL. It applies to both PR builds and deployments.
