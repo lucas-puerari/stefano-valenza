@@ -1,0 +1,44 @@
+---
+import { assetPath } from '../lib/articoli';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+const { title, description = 'Storie, guide e recensioni sul mondo della birra.' } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+---
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href={assetPath('/favicon.svg', base)} />
+    <title>{title ? `${title} | Stefano Valenza` : 'Stefano Valenza | Birra, senza fretta'}</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href={assetPath('/', base)} aria-label="Stefano Valenza, vai alla homepage">
+          <span class="brand-mark" aria-hidden="true">SV<span>.</span></span>
+          <span class="brand-name">STEFANO<br />VALENZA</span>
+        </a>
+        <nav aria-label="Navigazione principale">
+          <a href={assetPath('/#articoli', base)}>Articoli</a>
+          <a href={assetPath('/#chi-sono', base)}>Chi sono</a>
+        </nav>
+      </div>
+    </header>
+    <main><slot /></main>
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <span>© {new Date().getFullYear()} Stefano Valenza</span>
+        <span>Bevi con curiosità. Sempre con moderazione.</span>
+      </div>
+    </footer>
+  </body>
+</html>

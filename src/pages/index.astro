@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { assetPath, formatDate, getPublishedArticles } from '../lib/articoli';
+
+const articles = await getPublishedArticles();
+const base = import.meta.env.BASE_URL;
+---
+<BaseLayout>
+  <section class="hero">
+    <div class="container hero-inner">
+      <p class="eyebrow"><span class="eyebrow-line"></span> APPUNTI DAL MONDO DELLA BIRRA</p>
+      <h1>La birra è più bella<br />quando la <em>racconti.</em></h1>
+      <p class="hero-copy">Storie, degustazioni e idee per scoprire cosa c’è dietro ogni bicchiere. Senza complicazioni, con tutta la curiosità del mondo.</p>
+      <a class="button" href="#articoli">Esplora gli articoli <span aria-hidden="true">↗</span></a>
+      <div class="hero-decoration" aria-hidden="true">✳</div>
+    </div>
+  </section>
+
+  <section id="articoli" class="articles-section container" aria-labelledby="articles-title">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow dark">DA LEGGERE CON CALMA</p>
+        <h2 id="articles-title">Ultimi articoli<span class="accent">.</span></h2>
+      </div>
+      <span class="count">{String(articles.length).padStart(2, '0')} ARTICOLI</span>
+    </div>
+    {articles.length > 0 ? (
+      <div class="article-grid">
+        {articles.map((article) => (
+          <article class="article-card">
+            {article.data.cover && (
+              <a class="card-image" href={assetPath(`/articoli/${article.id}/`, base)} tabindex="-1" aria-hidden="true">
+                <img src={assetPath(article.data.cover, base)} alt="" loading="lazy" />
+              </a>
+            )}
+            <div class="card-body">
+              <div class="card-meta"><span class="tag">{article.data.type}</span>{article.data.draft && <span class="tag draft-tag">Bozza · solo in locale</span>}<time datetime={article.data.date.toISOString()}>{formatDate(article.data.date)}</time></div>
+              <h3><a href={assetPath(`/articoli/${article.id}/`, base)}>{article.data.title}</a></h3>
+              <p>{article.data.description}</p>
+              <a class="read-more" href={assetPath(`/articoli/${article.id}/`, base)} aria-label={`Leggi ${article.data.title}`}>Leggi l’articolo <span aria-hidden="true">↗</span></a>
+            </div>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <p class="empty-state">Gli articoli stanno arrivando. Torna presto a trovarmi!</p>
+    )}
+  </section>
+
+  <section id="chi-sono" class="about-section">
+    <div class="container about-inner">
+      <p class="eyebrow">DIETRO QUESTE PAROLE</p>
+      <h2>Ciao, sono Stefano<span class="accent">.</span></h2>
+      <p>Questo è il mio spazio per parlare di birra: cosa c’è nel bicchiere, le persone che la producono e le storie che vale la pena condividere.</p>
+    </div>
+  </section>
+</BaseLayout>
