@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Federo&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Germania+One&family=Space+Mono:wght@400;700&display=swap');
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
 @plugin 'daisyui' {
@@ -41,11 +41,11 @@
 
 @theme {
   --font-sans: 'DM Sans', system-ui, sans-serif;
-  --font-display: 'Federo', Georgia, serif;
+  --font-display: 'Germania One', Georgia, serif;
   --font-mono: 'Space Mono', monospace;
 }
 
-/* Vintage 1920s art deco headings. Federo ships a single upright weight, so stop the
+/* Vintage German beer-hall headings. Germania One ships a single upright weight, so stop the
    browser from faking bold (font-semibold) or slanting it (italic). */
 @utility font-display {
   font-family: var(--font-display);
