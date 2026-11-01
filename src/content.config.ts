@@ -32,6 +32,7 @@ const homePage = defineCollection({
     articlesTitle: z.string().min(1),
     articlesIntro: z.string().min(1),
     articleCountLabel: z.string().min(1),
+    articleCountSingularLabel: z.string().min(1),
     emptyArticles: z.string().min(1),
   }),
 });
@@ -76,6 +77,8 @@ const siteSettings = defineCollection({
     homeLabel: z.string().min(1),
     navArticles: z.string().min(1),
     navAbout: z.string().min(1),
+    navCollaborations: z.string().min(1),
+    skipLinkLabel: z.string().min(1),
     footerMessage: z.string().min(1),
     vatDisplay: z.string().min(1),
     reviewLabel: z.string().min(1),

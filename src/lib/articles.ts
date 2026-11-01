@@ -12,6 +12,11 @@ export function formatDate(date: Date) {
   }).format(date);
 }
 
+// Headings end with a decorative accent dot unless they already end with punctuation ("?." reads as a typo).
+export function needsAccentDot(text: string) {
+  return !/[.!?…:;]$/.test(text.trim());
+}
+
 // Astro's base is / for local development and /repo/ on project Pages.
 export function assetPath(path: string, base: string) {
   return `${base.replace(/\/$/, '')}${path}`;

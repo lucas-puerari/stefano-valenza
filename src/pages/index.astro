@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { assetPath, formatDate, getPublishedArticles } from '../lib/articles';
+import { assetPath, formatDate, getPublishedArticles, needsAccentDot } from '../lib/articles';
 import { getEntry, render } from 'astro:content';
 
 const home = await getEntry('homePage', 'home');
@@ -52,13 +52,13 @@ const base = import.meta.env.BASE_URL;
             <p class="text-xs font-semibold tracking-[.12em] text-warning">{home.data.featuredLabel}</p>
             <div class="flex flex-wrap items-center gap-2 text-xs">
               <span class="badge badge-outline badge-sm">{typeLabels[featuredArticle.data.type]}</span>
-              {featuredArticle.data.draft && <span class="badge badge-soft badge-error">{site.data.draftLabel}</span>}
+              {featuredArticle.data.draft && <span class="badge badge-soft badge-error badge-sm">{site.data.draftLabel}</span>}
               <time datetime={featuredArticle.data.date.toISOString()}>{formatDate(featuredArticle.data.date)}</time>
             </div>
             <h2 class="card-title mt-2 font-display text-2xl leading-snug font-semibold">{featuredArticle.data.title}</h2>
             <p class="leading-relaxed text-base-content/75">{featuredArticle.data.description}</p>
             <div class="card-actions mt-3">
-              <a class="btn btn-outline btn-primary" href={assetPath(`/articles/${featuredArticle.id}/`, base)}>{site.data.readArticleLabel} <span aria-hidden="true">↗</span></a>
+              <a class="btn btn-outline btn-primary" href={assetPath(`/articles/${featuredArticle.id}/`, base)}>{site.data.readArticleLabel} <span aria-hidden="true">→</span></a>
             </div>
           </div>
         </aside>
@@ -74,45 +74,49 @@ const base = import.meta.env.BASE_URL;
         <div class="prose mt-5 max-w-2xl sm:prose-lg"><AboutContent /></div>
       </div>
       {about.data.portrait && (
-        /* Sticker is cut flat at the bottom: keep it last, bottom-aligned, with no bottom padding so it rests on the section's edge. */
-        <img class="mx-auto block h-auto w-[min(100%,22rem)] self-end" src={assetPath(about.data.portrait, base)} alt={about.data.portraitAlt} width="384" height="336" loading="lazy" />
+        /* Elbows rest on the section's bottom edge and one hand hangs over it.
+           Image is 760x803 with the ledge at y≈607: the 196px overhang is 25.75% of its width; 30.5% sinks it a few px lower,
+           and a negative percentage margin (relative to width) pulls it out of the layout. */
+        <div class="relative z-10 mx-auto w-[min(100%,22rem)] self-end">
+          <img class="-mb-[30.5%] block h-auto w-full" src={assetPath(about.data.portrait, base)} alt={about.data.portraitAlt} width="760" height="803" loading="lazy" />
+        </div>
       )}
     </div>
   </section>
 
-  <section id="articles" class="mx-auto max-w-6xl scroll-mt-24 px-5 py-[clamp(2.75rem,6vw,6rem)] sm:px-6" aria-labelledby="articles-title">
+  <section id="articles" class:list={['mx-auto max-w-6xl scroll-mt-24 px-5 py-[clamp(2.75rem,6vw,6rem)] sm:px-6', about.data.portrait && 'max-lg:pt-[calc(clamp(2.75rem,6vw,6rem)+6rem)]']} aria-labelledby="articles-title">
     <div class="mb-7 flex flex-wrap items-end justify-between gap-4 sm:mb-9">
       <div>
         <p class="text-xs font-semibold tracking-[.12em] text-warning">{home.data.articlesEyebrow}</p>
         <h2 id="articles-title" class="mt-4 font-display text-[clamp(2rem,4vw,3.25rem)] leading-tight font-semibold tracking-tight">{home.data.articlesTitle}<span class="text-accent">.</span></h2>
         <p class="mt-4 max-w-2xl leading-relaxed text-base-content/75">{home.data.articlesIntro}</p>
       </div>
-      <span class="pb-2 text-xs tracking-wider text-base-content/60">{String(articles.length).padStart(2, '0')} {home.data.articleCountLabel}</span>
+      <span class="pb-2 text-xs tracking-wider text-base-content/60">{String(articles.length).padStart(2, '0')} {articles.length === 1 ? home.data.articleCountSingularLabel : home.data.articleCountLabel}</span>
     </div>
     {articles.length > 0 ? (
       <>
         <div class="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
           {homepageArticles.map((article) => (
-            <article class="card border border-base-300 bg-base-100 hover:border-primary/60">
+            <article class="card relative border border-base-300 bg-base-100 transition-colors focus-within:border-primary hover:border-primary/60">
               {article.data.cover && (
                 <figure><img class="aspect-[16/10] w-full object-cover" src={assetPath(article.data.cover, base)} alt={article.data.coverAlt} loading="lazy" /></figure>
               )}
               <div class="card-body p-5 sm:p-6">
                 <div class="flex flex-wrap items-center gap-2 text-xs text-base-content/70">
                   <span class="badge badge-outline badge-sm">{typeLabels[article.data.type]}</span>
-                  {article.data.draft && <span class="badge badge-soft badge-error">{site.data.draftLabel}</span>}
+                  {article.data.draft && <span class="badge badge-soft badge-error badge-sm">{site.data.draftLabel}</span>}
                   <time datetime={article.data.date.toISOString()}>{formatDate(article.data.date)}</time>
                 </div>
-                <h3 class="card-title mt-3 font-display text-xl leading-snug font-semibold"><a class="hover:text-accent" href={assetPath(`/articles/${article.id}/`, base)}>{article.data.title}</a></h3>
+                <h3 class="card-title mt-3 font-display text-xl leading-snug font-semibold"><a class="after:absolute after:inset-0 after:rounded-box hover:text-accent" href={assetPath(`/articles/${article.id}/`, base)}>{article.data.title}</a></h3>
                 <p class="mt-2 text-sm leading-relaxed text-base-content/75">{article.data.description}</p>
                 <div class="card-actions mt-auto pt-4">
-                  <a class="btn btn-ghost btn-sm px-0 text-primary" href={assetPath(`/articles/${article.id}/`, base)} aria-label={`Leggi ${article.data.title}`}>{site.data.readArticleLabel} <span aria-hidden="true">↗</span></a>
+                  <span class="text-sm font-semibold text-primary" aria-hidden="true">{site.data.readArticleLabel} →</span>
                 </div>
               </div>
             </article>
           ))}
         </div>
-        <div class="mt-8 flex justify-end"><a class="btn btn-outline btn-primary" href={assetPath('/articles/', base)}>{site.data.allArticlesLabel} <span aria-hidden="true">↗</span></a></div>
+        <div class="mt-8 flex justify-end"><a class="btn btn-outline btn-primary" href={assetPath('/articles/', base)}>{site.data.allArticlesLabel} <span aria-hidden="true">→</span></a></div>
       </>
     ) : (
       <div class="alert alert-info" role="status"><span>{home.data.emptyArticles}</span></div>
@@ -123,12 +127,12 @@ const base = import.meta.env.BASE_URL;
     <div class="mx-auto grid max-w-6xl gap-[clamp(1.5rem,4vw,3.5rem)] px-5 py-[clamp(2.75rem,6vw,6rem)] sm:px-6 lg:grid-cols-[2fr_3fr]">
       <div>
         <p class="text-xs font-semibold tracking-[.12em] text-warning">{collaborations.data.eyebrow}</p>
-        <h2 id="collaborations-title" class="mt-4 font-display text-[clamp(2rem,4vw,3.25rem)] leading-tight font-semibold tracking-tight">{collaborations.data.title}<span class="text-accent">.</span></h2>
+        <h2 id="collaborations-title" class="mt-4 font-display text-[clamp(2rem,4vw,3.25rem)] leading-tight font-semibold tracking-tight">{collaborations.data.title}{needsAccentDot(collaborations.data.title) && <span class="text-accent">.</span>}</h2>
       </div>
       <div>
         <div class="prose max-w-none sm:prose-lg"><CollaborationsContent /></div>
         {collaborations.data.contactEmail && collaborations.data.contactLabel && (
-          <a class="btn btn-primary mt-4" href={`mailto:${collaborations.data.contactEmail}`}>{collaborations.data.contactLabel} <span aria-hidden="true">↗</span></a>
+          <a class="btn btn-primary mt-4" href={`mailto:${collaborations.data.contactEmail}`}>{collaborations.data.contactLabel} <span aria-hidden="true">→</span></a>
         )}
       </div>
     </div>

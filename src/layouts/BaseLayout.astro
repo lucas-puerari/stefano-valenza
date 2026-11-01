@@ -19,10 +19,11 @@ const base = import.meta.env.BASE_URL;
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 ---
 <!doctype html>
-<html lang="it" data-theme="stefano">
+<html lang="it" data-theme="stefano" class="motion-safe:scroll-smooth">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#3c0f1e" />
     <meta name="description" content={description} />
     {site.data.prototype && <meta name="robots" content="noindex, nofollow" />}
     <link rel="canonical" href={canonical} />
@@ -39,8 +40,9 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
     <title>{pageTitle}</title>
   </head>
   <body class="bg-base-100 font-sans text-base-content antialiased">
+    <a class="btn btn-secondary btn-sm fixed top-3 left-3 z-[60] -translate-y-20 focus:translate-y-0" href="#content">{site.data.skipLinkLabel}</a>
     <header class="sticky top-0 z-50 border-b border-secondary/30 bg-primary text-primary-content">
-      <div class="navbar mx-auto flex max-w-6xl flex-nowrap px-4 py-3 sm:px-6 sm:py-4">
+      <div class="navbar mx-auto flex max-w-6xl flex-nowrap px-5 py-3 sm:px-6 sm:py-4">
         <div class="navbar-start min-w-0 flex-1">
           <a class="flex items-center gap-3 no-underline" href={assetPath('/', base)} aria-label={`${site.data.name}, ${site.data.homeLabel}`}>
             <div class="avatar avatar-placeholder" aria-hidden="true">
@@ -55,6 +57,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
           <ul class="menu menu-horizontal gap-3 p-0 text-sm font-semibold">
             <li><a class="hover:bg-primary-content/10 hover:text-secondary" href={assetPath('/#about', base)}>{site.data.navAbout}</a></li>
             <li><a class="hover:bg-primary-content/10 hover:text-secondary" href={assetPath('/#articles', base)}>{site.data.navArticles}</a></li>
+            <li><a class="hover:bg-primary-content/10 hover:text-secondary" href={assetPath('/#collaborations', base)}>{site.data.navCollaborations}</a></li>
           </ul>
         </nav>
         <nav class="navbar-end w-auto sm:hidden" aria-label={site.data.navigationLabel}>
@@ -66,14 +69,15 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
             <ul class="menu dropdown-content z-50 mt-2 w-48 rounded-md border border-base-300 bg-base-100 p-2 text-base-content">
               <li><a href={assetPath('/#about', base)}>{site.data.navAbout}</a></li>
               <li><a href={assetPath('/#articles', base)}>{site.data.navArticles}</a></li>
+              <li><a href={assetPath('/#collaborations', base)}>{site.data.navCollaborations}</a></li>
             </ul>
           </details>
         </nav>
       </div>
     </header>
-    <main><slot /></main>
-    <footer class="footer sm:footer-horizontal bg-neutral px-6 py-9 text-neutral-content">
-      <div class="mx-auto flex w-full max-w-6xl flex-col justify-between gap-4 sm:flex-row sm:items-start">
+    <main id="content" tabindex="-1" class="outline-none"><slot /></main>
+    <footer class="bg-neutral text-neutral-content">
+      <div class="mx-auto flex max-w-6xl flex-col justify-between gap-4 px-5 py-9 sm:flex-row sm:items-start sm:px-6">
         <div class="flex flex-col gap-1">
           <span class="font-display text-sm font-semibold">© {new Date().getFullYear()} {site.data.name}</span>
           <span class="text-xs text-neutral-content/75">{site.data.vatDisplay}</span>
