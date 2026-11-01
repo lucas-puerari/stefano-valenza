@@ -74,11 +74,12 @@ const base = import.meta.env.BASE_URL;
         <div class="prose mt-5 max-w-2xl sm:prose-lg"><AboutContent /></div>
       </div>
       {about.data.portrait && (
-        /* Elbows rest on the section's bottom edge and one hand hangs over it.
-           Image is 760x803 with the ledge at y≈607: the 196px overhang is 25.75% of its width; 30.5% sinks it a few px lower,
-           and a negative percentage margin (relative to width) pulls it out of the layout. */
+        /* Elbows rest on the section's bottom edge and the hands hang over it.
+           Image is 760x803 and is fully transparent below y=605 except the hands, so the bust never crosses the ledge.
+           Overhang = 803 - 605 = 198px = 26.05% of the width; a negative percentage margin (relative to width)
+           puts the ledge exactly on the section edge. Keep this value in sync with the image if it is re-exported. */
         <div class="relative z-10 mx-auto w-[min(100%,22rem)] self-end">
-          <img class="-mb-[30.5%] block h-auto w-full" src={assetPath(about.data.portrait, base)} alt={about.data.portraitAlt} width="760" height="803" loading="lazy" />
+          <img class="-mb-[26.05%] block h-auto w-full" src={assetPath(about.data.portrait, base)} alt={about.data.portraitAlt} width="760" height="803" loading="lazy" />
         </div>
       )}
     </div>
