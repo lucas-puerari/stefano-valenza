@@ -1,57 +1,133 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { assetPath, formatDate, getPublishedArticles } from '../lib/articoli';
+import { assetPath, formatDate, getPublishedArticles } from '../lib/articles';
+import { getEntry, render } from 'astro:content';
 
+const home = await getEntry('homePage', 'home');
+const about = await getEntry('aboutPage', 'about');
+const collaborations = await getEntry('collaborationsPage', 'collaborations');
+const site = await getEntry('siteSettings', 'site');
+const missingPages = [
+  !home && 'home.md',
+  !about && 'about.md',
+  !collaborations && 'collaborations.md',
+  !site && 'site.md',
+].filter(Boolean);
+if (!home || !about || !collaborations || !site) {
+  throw new Error(`Content not loaded: ${missingPages.join(', ')}. Check content/pages/ and restart the dev server if the files were just added.`);
+}
+const { Content: HomeContent } = await render(home);
+const { Content: AboutContent } = await render(about);
+const { Content: CollaborationsContent } = await render(collaborations);
+const typeLabels = {
+  review: site.data.reviewLabel,
+  guide: site.data.guideLabel,
+  story: site.data.storyLabel,
+};
 const articles = await getPublishedArticles();
+// Feature a real published article only when the homepage can show other articles too.
+const publishedArticles = articles.filter((article) => !article.data.draft);
+const featuredArticle = publishedArticles.length > 1 ? publishedArticles[0] : undefined;
+const homepageArticles = articles.filter((article) => article.id !== featuredArticle?.id).slice(0, 3);
 const base = import.meta.env.BASE_URL;
 ---
 <BaseLayout>
-  <section class="hero">
-    <div class="container hero-inner">
-      <p class="eyebrow"><span class="eyebrow-line"></span> APPUNTI DAL MONDO DELLA BIRRA</p>
-      <h1>La birra è più bella<br />quando la <em>racconti.</em></h1>
-      <p class="hero-copy">Storie, degustazioni e idee per scoprire cosa c’è dietro ogni bicchiere. Senza complicazioni, con tutta la curiosità del mondo.</p>
-      <a class="button" href="#articoli">Esplora gli articoli <span aria-hidden="true">↗</span></a>
-      <div class="hero-decoration" aria-hidden="true">✳</div>
+  <section class="bg-primary text-primary-content" aria-labelledby="home-title">
+    <div class:list={['mx-auto grid max-w-6xl gap-[clamp(1.5rem,4vw,3.5rem)] px-5 py-[clamp(2.75rem,6vw,6rem)] sm:px-6', featuredArticle && 'lg:grid-cols-[3fr_2fr] lg:items-end']}>
+      <div>
+        <p class="text-xs font-semibold tracking-[.12em] text-secondary">{home.data.eyebrow}</p>
+        <h1 id="home-title" class:list={['mt-5 max-w-3xl font-display leading-[1.12] font-semibold tracking-tight', featuredArticle ? 'text-[clamp(2rem,4vw,3.5rem)]' : 'text-[clamp(2rem,6.5vw,4.5rem)]']}>
+          <span class="block">{home.data.titleFirstLine}</span>
+          <span class="block">{home.data.titleSecondLine}</span>
+          <em class="block text-secondary">{home.data.titleEmphasis}</em>
+        </h1>
+        <div class="mt-5 max-w-xl text-[clamp(1rem,1.2vw,1.125rem)] leading-relaxed text-primary-content/90 [&_p]:text-primary-content/90"><HomeContent /></div>
+      </div>
+      {featuredArticle && (
+        <aside class="card border border-secondary/40 bg-base-100 text-base-content" aria-label={home.data.featuredLabel}>
+          {featuredArticle.data.cover && (
+            <figure><img class="aspect-[16/9] w-full object-cover" src={assetPath(featuredArticle.data.cover, base)} alt={featuredArticle.data.coverAlt} /></figure>
+          )}
+          <div class="card-body">
+            <p class="text-xs font-semibold tracking-[.12em] text-warning">{home.data.featuredLabel}</p>
+            <div class="flex flex-wrap items-center gap-2 text-xs">
+              <span class="badge badge-outline badge-sm">{typeLabels[featuredArticle.data.type]}</span>
+              {featuredArticle.data.draft && <span class="badge badge-soft badge-error">{site.data.draftLabel}</span>}
+              <time datetime={featuredArticle.data.date.toISOString()}>{formatDate(featuredArticle.data.date)}</time>
+            </div>
+            <h2 class="card-title mt-2 font-display text-2xl leading-snug font-semibold">{featuredArticle.data.title}</h2>
+            <p class="leading-relaxed text-base-content/75">{featuredArticle.data.description}</p>
+            <div class="card-actions mt-3">
+              <a class="btn btn-outline btn-primary" href={assetPath(`/articles/${featuredArticle.id}/`, base)}>{site.data.readArticleLabel} <span aria-hidden="true">↗</span></a>
+            </div>
+          </div>
+        </aside>
+      )}
     </div>
   </section>
 
-  <section id="articoli" class="articles-section container" aria-labelledby="articles-title">
-    <div class="section-heading">
-      <div>
-        <p class="eyebrow dark">DA LEGGERE CON CALMA</p>
-        <h2 id="articles-title">Ultimi articoli<span class="accent">.</span></h2>
+  <section id="about" class="scroll-mt-24 bg-base-200" aria-labelledby="about-title">
+    <div class:list={['mx-auto grid max-w-6xl gap-[clamp(1.5rem,4vw,3.5rem)] px-5 py-[clamp(2.75rem,6vw,6rem)] sm:px-6 lg:items-center', about.data.portrait && 'lg:grid-cols-2']}>
+      <div class:list={[!about.data.portrait && 'max-w-3xl']}>
+        <p class="text-xs font-semibold tracking-[.12em] text-warning">{about.data.eyebrow}</p>
+        <h2 id="about-title" class="mt-4 font-display text-[clamp(2rem,4vw,3.25rem)] leading-tight font-semibold tracking-tight">{about.data.title}<span class="text-accent">.</span></h2>
+        <div class="prose mt-5 max-w-2xl sm:prose-lg"><AboutContent /></div>
       </div>
-      <span class="count">{String(articles.length).padStart(2, '0')} ARTICOLI</span>
+      {about.data.portrait && <img class="aspect-[4/3] w-full rounded-lg object-cover" src={assetPath(about.data.portrait, base)} alt={about.data.portraitAlt} loading="lazy" />}
+    </div>
+  </section>
+
+  <section id="articles" class="mx-auto max-w-6xl scroll-mt-24 px-5 py-[clamp(2.75rem,6vw,6rem)] sm:px-6" aria-labelledby="articles-title">
+    <div class="mb-7 flex flex-wrap items-end justify-between gap-4 sm:mb-9">
+      <div>
+        <p class="text-xs font-semibold tracking-[.12em] text-warning">{home.data.articlesEyebrow}</p>
+        <h2 id="articles-title" class="mt-4 font-display text-[clamp(2rem,4vw,3.25rem)] leading-tight font-semibold tracking-tight">{home.data.articlesTitle}<span class="text-accent">.</span></h2>
+        <p class="mt-4 max-w-2xl leading-relaxed text-base-content/75">{home.data.articlesIntro}</p>
+      </div>
+      <span class="pb-2 text-xs tracking-wider text-base-content/60">{String(articles.length).padStart(2, '0')} {home.data.articleCountLabel}</span>
     </div>
     {articles.length > 0 ? (
-      <div class="article-grid">
-        {articles.map((article) => (
-          <article class="article-card">
-            {article.data.cover && (
-              <a class="card-image" href={assetPath(`/articoli/${article.id}/`, base)} tabindex="-1" aria-hidden="true">
-                <img src={assetPath(article.data.cover, base)} alt="" loading="lazy" />
-              </a>
-            )}
-            <div class="card-body">
-              <div class="card-meta"><span class="tag">{article.data.type}</span>{article.data.draft && <span class="tag draft-tag">Bozza · solo in locale</span>}<time datetime={article.data.date.toISOString()}>{formatDate(article.data.date)}</time></div>
-              <h3><a href={assetPath(`/articoli/${article.id}/`, base)}>{article.data.title}</a></h3>
-              <p>{article.data.description}</p>
-              <a class="read-more" href={assetPath(`/articoli/${article.id}/`, base)} aria-label={`Leggi ${article.data.title}`}>Leggi l’articolo <span aria-hidden="true">↗</span></a>
-            </div>
-          </article>
-        ))}
-      </div>
+      <>
+        <div class="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {homepageArticles.map((article) => (
+            <article class="card border border-base-300 bg-base-100 hover:border-primary/60">
+              {article.data.cover && (
+                <figure><img class="aspect-[16/10] w-full object-cover" src={assetPath(article.data.cover, base)} alt={article.data.coverAlt} loading="lazy" /></figure>
+              )}
+              <div class="card-body p-5 sm:p-6">
+                <div class="flex flex-wrap items-center gap-2 text-xs text-base-content/70">
+                  <span class="badge badge-outline badge-sm">{typeLabels[article.data.type]}</span>
+                  {article.data.draft && <span class="badge badge-soft badge-error">{site.data.draftLabel}</span>}
+                  <time datetime={article.data.date.toISOString()}>{formatDate(article.data.date)}</time>
+                </div>
+                <h3 class="card-title mt-3 font-display text-xl leading-snug font-semibold"><a class="hover:text-accent" href={assetPath(`/articles/${article.id}/`, base)}>{article.data.title}</a></h3>
+                <p class="mt-2 text-sm leading-relaxed text-base-content/75">{article.data.description}</p>
+                <div class="card-actions mt-auto pt-4">
+                  <a class="btn btn-ghost btn-sm px-0 text-primary" href={assetPath(`/articles/${article.id}/`, base)} aria-label={`Leggi ${article.data.title}`}>{site.data.readArticleLabel} <span aria-hidden="true">↗</span></a>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+        <div class="mt-8 flex justify-end"><a class="btn btn-outline btn-primary" href={assetPath('/articles/', base)}>{site.data.allArticlesLabel} <span aria-hidden="true">↗</span></a></div>
+      </>
     ) : (
-      <p class="empty-state">Gli articoli stanno arrivando. Torna presto a trovarmi!</p>
+      <div class="alert alert-info" role="status"><span>{home.data.emptyArticles}</span></div>
     )}
   </section>
 
-  <section id="chi-sono" class="about-section">
-    <div class="container about-inner">
-      <p class="eyebrow">DIETRO QUESTE PAROLE</p>
-      <h2>Ciao, sono Stefano<span class="accent">.</span></h2>
-      <p>Questo è il mio spazio per parlare di birra: cosa c’è nel bicchiere, le persone che la producono e le storie che vale la pena condividere.</p>
+  <section id="collaborations" class="scroll-mt-24 bg-base-200" aria-labelledby="collaborations-title">
+    <div class="mx-auto grid max-w-6xl gap-[clamp(1.5rem,4vw,3.5rem)] px-5 py-[clamp(2.75rem,6vw,6rem)] sm:px-6 lg:grid-cols-[2fr_3fr]">
+      <div>
+        <p class="text-xs font-semibold tracking-[.12em] text-warning">{collaborations.data.eyebrow}</p>
+        <h2 id="collaborations-title" class="mt-4 font-display text-[clamp(2rem,4vw,3.25rem)] leading-tight font-semibold tracking-tight">{collaborations.data.title}<span class="text-accent">.</span></h2>
+      </div>
+      <div>
+        <div class="prose max-w-none sm:prose-lg"><CollaborationsContent /></div>
+        {collaborations.data.contactEmail && collaborations.data.contactLabel && (
+          <a class="btn btn-primary mt-4" href={`mailto:${collaborations.data.contactEmail}`}>{collaborations.data.contactLabel} <span aria-hidden="true">↗</span></a>
+        )}
+      </div>
     </div>
   </section>
 </BaseLayout>

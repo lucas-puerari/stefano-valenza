@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { assetPath, formatDate, getPublishedArticles } from '../../lib/articles';
+import { getEntry } from 'astro:content';
+
+const site = await getEntry('siteSettings', 'site');
+const home = await getEntry('homePage', 'home');
+if (!site || !home) throw new Error('Missing content/pages/site.md or content/pages/home.md');
+const articles = await getPublishedArticles();
+const typeLabels = {
+  review: site.data.reviewLabel,
+  guide: site.data.guideLabel,
+  story: site.data.storyLabel,
+};
+const groups = (['guide', 'review', 'story'] as const)
+  .map((type) => ({ type, label: typeLabels[type], items: articles.filter((article) => article.data.type === type) }))
+  .filter((group) => group.items.length > 0);
+const base = import.meta.env.BASE_URL;
+---
+<BaseLayout title={site.data.allArticlesLabel} description={home.data.articlesIntro}>
+  <div class="mx-auto max-w-6xl px-5 py-[clamp(2.75rem,6vw,5rem)] sm:px-6">
+    <nav class="breadcrumbs text-sm" aria-label="Percorso di navigazione">
+      <ul><li><a href={assetPath('/', base)}>{site.data.homePageTitle}</a></li><li aria-current="page">{site.data.allArticlesLabel}</li></ul>
+    </nav>
+    <header class="mt-7 mb-9 max-w-3xl sm:mt-10 sm:mb-12">
+      <p class="text-xs font-semibold tracking-[.12em] text-warning">{home.data.articlesEyebrow}</p>
+      <h1 class="mt-4 font-display text-[clamp(2.25rem,5vw,4rem)] leading-tight font-semibold tracking-tight">{site.data.allArticlesLabel}<span class="text-accent">.</span></h1>
+      <p class="mt-5 text-[clamp(1rem,1.3vw,1.125rem)] leading-relaxed text-base-content/75">{home.data.articlesIntro}</p>
+    </header>
+    {groups.length > 1 && (
+      <nav class="mb-12 flex flex-wrap gap-2" aria-label="Categorie degli articoli">
+        {groups.map((group) => <a class="btn btn-outline btn-primary btn-sm capitalize" href={`#${group.type}`}>{group.label} <span class="badge badge-ghost badge-sm">{group.items.length}</span></a>)}
+      </nav>
+    )}
+    {groups.length > 0 ? groups.map((group) => (
+      <section id={group.type} class="mb-[clamp(2.5rem,6vw,4rem)] scroll-mt-24" aria-labelledby={`${group.type}-title`}>
+        <h2 id={`${group.type}-title`} class="mb-6 font-display text-[clamp(1.5rem,3vw,2rem)] font-semibold capitalize">{group.label}</h2>
+        <div class="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {group.items.map((article) => (
+            <article class="card border border-base-300 bg-base-100 hover:border-primary/60">
+              {article.data.cover && <figure><img class="aspect-[16/10] w-full object-cover" src={assetPath(article.data.cover, base)} alt={article.data.coverAlt} loading="lazy" /></figure>}
+              <div class="card-body p-5 sm:p-6">
+                <div class="flex flex-wrap items-center gap-2 text-xs text-base-content/70">
+                  {article.data.draft && <span class="badge badge-soft badge-error">{site.data.draftLabel}</span>}
+                  <time datetime={article.data.date.toISOString()}>{formatDate(article.data.date)}</time>
+                </div>
+                <h3 class="card-title mt-2 font-display text-xl leading-snug font-semibold"><a class="hover:text-accent" href={assetPath(`/articles/${article.id}/`, base)}>{article.data.title}</a></h3>
+                <p class="mt-2 text-sm leading-relaxed text-base-content/75">{article.data.description}</p>
+                <div class="card-actions mt-auto pt-4"><a class="btn btn-ghost btn-sm px-0 text-primary" href={assetPath(`/articles/${article.id}/`, base)} aria-label={`Leggi ${article.data.title}`}>{site.data.readArticleLabel} <span aria-hidden="true">↗</span></a></div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+    )) : <div class="alert alert-info" role="status"><span>{home.data.emptyArticles}</span></div>}
+  </div>
+</BaseLayout>

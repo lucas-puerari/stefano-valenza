@@ -2,7 +2,7 @@ import { getCollection } from 'astro:content';
 
 export async function getPublishedArticles() {
   // Drafts are visible while running the local dev server, never in production builds.
-  const articles = await getCollection('articoli', ({ data }) => import.meta.env.DEV || !data.draft);
+  const articles = await getCollection('articles', ({ data }) => import.meta.env.DEV || !data.draft);
   return articles.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 }
 

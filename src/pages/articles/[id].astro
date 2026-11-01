@@ -1,0 +1,63 @@
+---
+import { getPublishedArticles, formatDate, assetPath } from '../../lib/articles';
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const articles = await getPublishedArticles();
+  return articles.map((article) => ({ params: { id: article.id }, props: { article } }));
+}
+
+const { article } = Astro.props;
+const { Content } = await render(article);
+const related = (await getPublishedArticles()).filter((entry) => entry.id !== article.id).slice(0, 2);
+const site = await getEntry('siteSettings', 'site');
+if (!site) throw new Error('Missing content/pages/site.md');
+const typeLabels = {
+  review: site.data.reviewLabel,
+  guide: site.data.guideLabel,
+  story: site.data.storyLabel,
+};
+const base = import.meta.env.BASE_URL;
+---
+<BaseLayout title={article.data.title} description={article.data.description} type="article" published={article.data.date} image={article.data.cover} imageAlt={article.data.coverAlt}>
+  <article class="mx-auto max-w-4xl px-5 py-[clamp(2.75rem,6vw,5rem)] sm:px-6">
+    <nav class="breadcrumbs text-sm" aria-label="Percorso di navigazione">
+      <ul><li><a href={assetPath('/', base)}>{site.data.homePageTitle}</a></li><li><a href={assetPath('/articles/', base)}>{site.data.allArticlesLabel}</a></li><li aria-current="page">{article.data.title}</li></ul>
+    </nav>
+    <header class="mt-7 mb-8 sm:mt-10 sm:mb-10">
+      <div class="flex flex-wrap items-center gap-3 text-sm text-base-content/75">
+        <span class="badge badge-soft badge-warning uppercase">{typeLabels[article.data.type]}</span>
+        {article.data.draft && <span class="badge badge-soft badge-error">{site.data.draftLabel}</span>}
+        <time datetime={article.data.date.toISOString()}>{formatDate(article.data.date)}</time>
+      </div>
+      <h1 class="mt-6 font-display text-[clamp(2rem,4.5vw,3.75rem)] leading-tight font-semibold tracking-tight">{article.data.title}</h1>
+      <p class="mt-5 text-[clamp(1.1rem,1.7vw,1.25rem)] leading-relaxed opacity-75">{article.data.description}</p>
+      {(article.data.brewery || article.data.style) && (
+        <div class="stats stats-vertical mt-6 bg-base-200 sm:stats-horizontal">
+          {article.data.brewery && <div class="stat"><div class="stat-title">{site.data.breweryLabel}</div><div class="stat-value text-base">{article.data.brewery}</div></div>}
+          {article.data.style && <div class="stat"><div class="stat-title">{site.data.styleLabel}</div><div class="stat-value text-base">{article.data.style}</div></div>}
+        </div>
+      )}
+    </header>
+    {article.data.cover && <img class="mb-10 max-h-[520px] w-full object-cover" src={assetPath(article.data.cover, base)} alt={article.data.coverAlt} />}
+    <div class="prose max-w-[68ch] prose-headings:font-display prose-headings:font-semibold prose-a:text-warning prose-img:rounded-lg sm:prose-lg"><Content /></div>
+    {related.length > 0 && (
+      <aside class="mt-[clamp(3rem,6vw,4rem)] border-t border-base-300 pt-8 sm:pt-10" aria-labelledby="related-title">
+        <h2 id="related-title" class="font-display text-[clamp(1.5rem,3vw,2rem)] font-semibold">{site.data.relatedArticlesLabel}</h2>
+        <div class="mt-6 grid gap-4 sm:grid-cols-2">
+          {related.map((entry) => (
+            <div class="card border border-base-300 bg-base-100 hover:border-primary/60">
+              <div class="card-body">
+                <span class="badge badge-outline badge-sm">{typeLabels[entry.data.type]}</span>
+                <h3 class="card-title mt-2 font-display text-xl font-semibold"><a class="hover:text-accent" href={assetPath(`/articles/${entry.id}/`, base)}>{entry.data.title}</a></h3>
+                <p class="text-sm text-base-content/75">{entry.data.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </aside>
+    )}
+    <div class="mt-10 border-t border-base-300 pt-6 sm:mt-12"><a class="btn btn-ghost px-0 text-primary" href={assetPath('/articles/', base)}>← {site.data.backToArticlesLabel}</a></div>
+  </article>
+</BaseLayout>
