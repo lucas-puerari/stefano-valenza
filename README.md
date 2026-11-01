@@ -1,17 +1,21 @@
-# Stefano Valenza — sito statico
+# Stefano Valenza — static site
 
-Sito Astro con contenuti in Markdown e pubblicazione automatica su GitHub Pages. Non servono database o CMS.
+An Astro site with Markdown content and automatic deployment to GitHub Pages. No database or CMS required. Project documentation and code are in English; the website and articles are in Italian.
 
-## Lavorare in locale
+## UI stack
 
-Servono Node.js 24 e npm. Clona il repository, poi:
+The site uses **Tailwind CSS v4** for layout utilities, **daisyUI v5** for ready-made UI components (navbar, hero, cards, badges, buttons, breadcrumbs, stats, footer), and **Tailwind Typography** for Markdown prose. Astro generates static HTML; there is no client-side framework. A small script closes the native mobile menu after navigation, on outside click, or on Escape. `src/styles/global.css` defines only fonts and the flat, shadow-free, dark-burgundy `stefano` daisyUI theme (with contemporary sans-serif typography and restrained rounded corners). Use daisyUI component classes plus Tailwind utilities for new UI; do not add custom UI components or component-specific CSS. Keep visible copy in `content/pages/`, not in page markup. Test interactive UI with keyboard and assistive technology before launch.
+
+## Develop locally
+
+Requires Node.js 24 and npm. Clone the repository, then run:
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Apri l'indirizzo mostrato nel terminale (di norma `http://localhost:4321/`). Le modifiche ai file Markdown e al sito appaiono automaticamente nel browser. Per controllare la build di produzione:
+Open the URL shown in the terminal (usually `http://localhost:4321/`). Changes to Markdown files and site code appear automatically in the browser. Check the production build with:
 
 ```sh
 npm run check
@@ -19,18 +23,31 @@ npm run build
 npm run preview
 ```
 
-`dist/` è il sito generato, non va modificato né caricato su Git. In locale si usa `/`; su GitHub Pages gli URL includono automaticamente il nome del repository, se necessario.
+`dist/` contains generated files; do not edit or commit it. Local URLs use `/`; GitHub Pages URLs automatically include the repository name where needed.
 
-## Scrivere un articolo
+## Edit site copy
 
-Crea un file `content/articoli/nome-articolo.md` (usa un nome breve, minuscolo e con trattini). Esempio:
+All public-facing text is in Italian and lives in Markdown files outside `src/`:
+
+- `content/pages/home.md`: homepage hero, articles section headings, empty state. The text **below** the `---` frontmatter is the hero introduction; edit it using Markdown.
+- `content/pages/about.md`: about-section heading and introduction. The text below the frontmatter is the section body; Markdown links and paragraphs are supported. Optionally add both `portrait: "/images/stefano.jpg"` and an Italian `portraitAlt` after placing a real photo in `public/images/`.
+- `content/pages/collaborations.md`: collaboration and contact section. Add both `contactEmail` (a real address) and `contactLabel` to show a contact button; omit both until an address is available.
+- `content/pages/site.md`: site name, homepage browser title and breadcrumb label (`homePageTitle`, currently `Home`), descriptions, navigation (including `mobileMenuLabel`), footer (including `vatDisplay`), article labels, and other shared text. These values live between the `---` lines at the top of the file (YAML frontmatter); quote text containing `:` or other YAML-special characters.
+
+Keep the English field names unchanged, edit the Italian values, then check the result with `npm run dev`. Missing required fields or invalid YAML cause the build to fail instead of silently publishing broken content. Use a branch and PR for these edits, just as you would for articles.
+
+The homepage shows the latest articles and links to the full `/articles/` archive, which groups articles by type without requiring JavaScript. The collaboration section has no public contact button until a real email address is provided. `prototype: true` in `content/pages/site.md` adds `noindex, nofollow` to all pages, including production, so this demo is not intentionally submitted for indexing. Replace placeholder text (including the `00000000000` VAT number), check legal/privacy details and real URLs, then set `prototype: false` when ready to launch.
+
+## Write an article
+
+Add a Markdown file at `content/articles/article-slug.md` (use a short, lowercase filename with hyphens). For example:
 
 ```md
 ---
 title: "Una birra da raccontare"
-description: "Una frase breve che descrive l'articolo."
+description: "Una breve descrizione dell'articolo."
 date: 2026-03-02
-type: recensione
+type: review
 brewery: "Nome del birrificio"
 style: "Pils"
 draft: true
@@ -39,34 +56,36 @@ draft: true
 Qui inizia il testo. Puoi usare **grassetto**, link e titoli `##`.
 ```
 
-Campi obbligatori: `title`, `description`, `date` (formato `AAAA-MM-GG`), `type` (`recensione`, `guida` o `storia`). `brewery`, `style`, `cover`, `coverAlt` e `draft` sono facoltativi. Se aggiungi `cover`, devi aggiungere `coverAlt` (descrizione dell'immagine). `draft: true` mostra l'articolo nell'anteprima con `npm run dev`, contrassegnato come bozza, ma lo esclude dalla build di produzione (`npm run build`, `npm run preview` e GitHub Pages). Togli `draft` o impostalo a `false` per pubblicarlo. C'è una bozza d'esempio in `content/articoli/esempio-recensione.md`.
+Required fields: `title`, `description`, `date` (`YYYY-MM-DD`), and `type` (`review`, `guide`, or `story`). Optional fields: `brewery`, `style`, `cover`, `coverAlt`, and `draft`. Field names and type values are in English, but titles, descriptions, and article text should be in Italian. Type values are translated into Italian on the site.
 
-Per una copertina, copia il file in `public/images/` e indica, per esempio:
+With `draft: true`, an article is visible and marked as a draft in the local development server (`npm run dev`), but excluded from production builds (`npm run build`, `npm run preview`, and GitHub Pages). Remove `draft` or set it to `false` to publish. See `content/articles/sample-review.md` for an example draft.
+
+To add a cover, save the image in `public/images/` and provide both fields:
 
 ```yaml
-cover: "/images/nome-articolo.jpg"
+cover: "/images/article-slug.jpg"
 coverAlt: "Bicchiere di birra sul tavolo"
 ```
 
-Usa immagini tue o con licenza adeguata, preferibilmente compresse. Per inserire immagini **nel corpo** dell'articolo, salvale accanto al file Markdown e usa un percorso relativo, per esempio `![Descrizione](./foto.jpg)`: Astro le elabora durante la build. Non usare percorsi assoluti `/images/` nel corpo Markdown: su Pages con sottocartella non funzionerebbero.
+Use your own or appropriately licensed images, preferably compressed. For images **inside the article body**, place them alongside the Markdown file and reference them with a relative path, e.g. `![Descrizione](./foto.jpg)`. Astro processes them at build time. Do not use absolute `/images/` paths inside Markdown: they would break on a GitHub Pages project URL with a subpath.
 
-Per creare una bozza senza usare il terminale, puoi anche aggiungere o modificare un file Markdown nell'interfaccia web di GitHub, selezionando un nuovo branch e aprendo una PR. Per l'anteprima visiva e gli aggiornamenti immediati, usa il server locale.
+You can also edit Markdown files directly on GitHub, create a branch, and open a PR without using a terminal. Use the local development server for immediate visual previews.
 
-## Da contenuto a pubblicazione
+## From draft to publication
 
-1. Crea un branch: `git switch -c articolo/nome-articolo`.
-2. Scrivi e controlla localmente con `npm run dev`; lascia `draft: true` finché il testo non è pronto.
-3. Imposta `draft: false`, esegui `npm run check && npm run build`, fai commit e push: `git add . && git commit -m "Aggiungi articolo" && git push -u origin articolo/nome-articolo`.
-4. Apri una pull request verso `main`. La workflow controlla tipi e build sulla PR, **senza pubblicare**.
-5. Dopo la revisione, fai merge su `main`: la stessa workflow costruisce e pubblica automaticamente su GitHub Pages. Per correggere un articolo, segui lo stesso percorso con un nuovo branch e una nuova PR.
+1. Create a branch named `type/short-slug`, for example `git switch -c content/new-review`. Allowed types: `feat`, `fix`, `docs`, `content`, `refactor`, `style`, `test`, `chore`, `ci`, `perf`, and `build`. Use lowercase letters, numbers, and hyphens in the slug.
+2. Write and preview with `npm run dev`; keep `draft: true` until the article is ready.
+3. Set `draft: false`, run `npm run check && npm run build`, then commit with a [Conventional Commit](https://www.conventionalcommits.org/), for example `git add content/articles && git commit -m "content: add new review" && git push -u origin content/new-review`. Every commit in a PR, including subsequent fixes, must use `type: short description` or `type(scope): short description`.
+4. Open a pull request targeting `main` and fill in `.github/PULL_REQUEST_TEMPLATE.md`: summary, checked change type, verification, and publishing notes. The **PR title must also be a Conventional Commit** (for example `content: add new review`). CI checks the branch, every commit, PR title, template, tests, types, and production build; PRs **never deploy**.
+5. After review and a passing required **build** check, squash-merge into `main`. Only this merge triggers the build and deploy to GitHub Pages. Direct pushes to `main` are blocked by GitHub branch protection.
 
-## Configurare GitHub Pages (una volta sola)
+## Configure GitHub Pages (once)
 
-1. Crea un repository GitHub e imposta `main` come branch principale; fai push di questo progetto (incluso `package-lock.json`).
-2. In **Settings → Pages → Build and deployment**, seleziona **GitHub Actions** come source. In **Settings → Actions → General** assicurati che le Actions siano abilitate.
-3. Consigliato: in **Settings → Branches** aggiungi una regola per `main` che richieda la PR e il successo del job **build** prima del merge (e impedisca i push diretti). Per repository privati verifica che il piano GitHub supporti Pages e le regole di protezione desiderate.
-4. Al primo push su `main` parte il deploy. L'indirizzo predefinito è `https://UTENTE.github.io/NOME-REPO/` (o `https://UTENTE.github.io/` per un repository `UTENTE.github.io`).
+1. Push the initial repository (including `package-lock.json`) to GitHub. This one-time bootstrap must happen before protection can be enabled on the empty repository.
+2. Select **GitHub Actions** as the source in **Settings → Pages → Build and deployment**. Make sure Actions are enabled under **Settings → Actions → General**.
+3. Protect `main` in **Settings → Branches**: require a PR and the passing **build** check, apply the protection to administrators, require linear history, and allow squash merges only. This repository is configured with those settings; verify them before editing repository governance.
+4. After a PR merges, the `push` workflow deploys the site. The default URL is `https://USER.github.io/REPO/`, or `https://USER.github.io/` for a `USER.github.io` repository.
 
-Per un dominio personalizzato, configurarlo in **Settings → Pages** e impostare in **Settings → Secrets and variables → Actions → Variables** la variabile `SITE_URL` al suo URL completo, per esempio `https://birra.example/`. In alternativa `SITE_URL` può indicare l'URL Pages completo se si desidera sovrascrivere quello rilevato automaticamente. La variabile è usata sia nella build delle PR sia nella pubblicazione.
+For a custom domain, configure it in **Settings → Pages** and set the `SITE_URL` variable in **Settings → Secrets and variables → Actions → Variables** to the full URL, e.g. `https://beer.example/`. `SITE_URL` can also override the automatically detected GitHub Pages URL. It applies to both PR builds and deployments.
 
-Le modifiche a `main` (anche push diretti e avvio manuale della workflow) pubblicano il sito: la protezione del branch è ciò che rende obbligatorio il passaggio tramite PR.
+The deploy job runs only on a `push` to protected `main` after the build succeeds. CI conventions block PR merges; branch protection is what blocks direct pushes. Repository administrators can change protection settings, so restrict admin access appropriately.
